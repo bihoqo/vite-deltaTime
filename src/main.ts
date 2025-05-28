@@ -1,9 +1,10 @@
-import './style.css'
+import './style.css' // Import styling for the page
 
-// HTML structure
+// Inject HTML structure into the page
 document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
   <h1>Ball Physics Simulation</h1>
 
+  <!-- Two canvases with controls for FPS and deltaTime usage -->
   <div class="canvas-container">
     <div class="canvas-wrapper">
       <h2>Canvas 1</h2>
@@ -36,53 +37,55 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
     </div>
   </div>
 
+  <!-- Button to reset both balls -->
   <button id="resetBtn">Reset</button>
 `
 
-// Ball class to handle physics and rendering
+// Ball class simulates physics and drawing logic
 class Ball {
-    private x: number;
-    private y: number;
-    private radius: number;
-    private velocity: number;
-    private gravity: number;
-    private stopped: boolean;
+    private static readonly RADIUS: number = 20; // Ball size
+    private static readonly GRAVITY: number = 9.8 * 50; // Simulated gravity (scaled for better visual effect)
+
+    private x: number = 0; // X position
+    private y: number = 0; // Y position
+    private velocity: number = 0; // Vertical speed
+    private stopped: boolean = false; // Whether the ball has hit the ground
     private canvas: HTMLCanvasElement;
     private ctx: CanvasRenderingContext2D;
 
     constructor(canvas: HTMLCanvasElement) {
         this.canvas = canvas;
         this.ctx = canvas.getContext('2d')!;
-        this.radius = 20;
-        this.reset();
+        this.reset(); // Set initial values
     }
 
+    // Reset ball to initial state
     reset(): void {
         this.x = this.canvas.width / 2;
-        this.y = this.radius;
+        this.y = Ball.RADIUS;
         this.velocity = 0;
-        this.gravity = 9.8 * 50; // Scaled gravity for better visualization
         this.stopped = false;
     }
 
+    // Update position and velocity based on deltaTime
     update(deltaTime: number): void {
         if (this.stopped) return;
 
-        // Apply gravity to velocity
-        this.velocity += this.gravity * deltaTime;
+        // Apply gravity to vertical velocity
+        this.velocity += Ball.GRAVITY * deltaTime;
 
-        // Update position
+        // Update vertical position based on velocity
         this.y += this.velocity * deltaTime;
 
-        // Check if ball hit the ground
-        if (this.y + this.radius >= this.canvas.height) {
-            this.y = this.canvas.height - this.radius;
+        // Stop if ball hits the bottom
+        if (this.y + Ball.RADIUS >= this.canvas.height) {
+            this.y = this.canvas.height - Ball.RADIUS;
             this.stopped = true;
         }
     }
 
+    // Draw the ball and ground
     render(): void {
-        // Clear canvas
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
         // Draw ground line
@@ -92,9 +95,9 @@ class Ball {
         this.ctx.strokeStyle = '#333';
         this.ctx.stroke();
 
-        // Draw ball
+        // Draw ball with color based on state
         this.ctx.beginPath();
-        this.ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        this.ctx.arc(this.x, this.y, Ball.RADIUS, 0, Math.PI * 2);
         this.ctx.fillStyle = this.stopped ? '#ff6b6b' : '#4CAF50';
         this.ctx.fill();
         this.ctx.strokeStyle = '#333';
@@ -102,13 +105,13 @@ class Ball {
     }
 }
 
-// Animation controller
+// Handles animation and controls for each canvas
 class AnimationController {
     private ball: Ball;
     private fpsInput: HTMLInputElement;
     private deltaTimeCheckbox: HTMLInputElement;
-    private animationFrameId: number | null = null;
-    private lastTime: number = 0;
+    private animationFrameId: number | null = null; // Used to cancel animation
+    private lastTime: number = 0; // Last frame timestamp
     private fps: number;
     private frameInterval: number;
 
@@ -126,20 +129,22 @@ class AnimationController {
         this.fps = parseInt(this.fpsInput.value);
         this.frameInterval = 1000 / this.fps;
 
-        // Event listeners for controls
+        // Update FPS dynamically on user change
         this.fpsInput.addEventListener('change', () => {
             this.fps = parseInt(this.fpsInput.value);
             this.frameInterval = 1000 / this.fps;
         });
 
-        this.start();
+        this.start(); // Start animation loop
     }
 
+    // Starts the animation loop
     start(): void {
         this.lastTime = performance.now();
         this.animate(this.lastTime);
     }
 
+    // Stop the animation loop
     stop(): void {
         if (this.animationFrameId !== null) {
             cancelAnimationFrame(this.animationFrameId);
@@ -147,39 +152,42 @@ class AnimationController {
         }
     }
 
+    // Reset the ball and restart animation
     reset(): void {
         this.ball.reset();
         this.start();
     }
 
+    // Animation loop
     animate(currentTime: number): void {
+        // Schedule next frame
         this.animationFrameId = requestAnimationFrame((time) => this.animate(time));
 
         const elapsed = currentTime - this.lastTime;
 
-        // If using fixed FPS (not deltaTime)
+        // If not using delta time, only update when enough time has passed
         if (!this.deltaTimeCheckbox.checked && elapsed < this.frameInterval) {
             return;
         }
 
-        // Calculate delta time in seconds
+        // Calculate deltaTime (in seconds)
         const deltaTime = this.deltaTimeCheckbox.checked
             ? elapsed / 1000
             : this.frameInterval / 1000;
 
         this.lastTime = currentTime;
 
-        // Update and render
+        // Update physics and draw
         this.ball.update(deltaTime);
         this.ball.render();
     }
 }
 
-// Initialize animation controllers
+// Create controllers for both canvases
 const controller1 = new AnimationController('canvas1', 'fps1', 'deltatime1');
 const controller2 = new AnimationController('canvas2', 'fps2', 'deltatime2');
 
-// Reset button
+// Reset button handler - resets both simulations
 const resetBtn = document.getElementById('resetBtn') as HTMLButtonElement;
 resetBtn.addEventListener('click', () => {
     controller1.reset();
