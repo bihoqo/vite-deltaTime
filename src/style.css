@@ -1,3 +1,4 @@
+/* Updated CSS with visual enhancements */
 :root {
   font-family: Arial, sans-serif;
   line-height: 1.5;
@@ -30,15 +31,17 @@ body {
 .canvas-wrapper {
   border: 1px solid #ccc;
   padding: 15px;
-  border-radius: 8px;
-  background-color: white;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  background: linear-gradient(to bottom right, #ffffff, #e9ecef);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 canvas {
-  border: 1px solid #ddd;
-  background-color: #f9f9f9;
+  border: 2px solid #888;
+  background-color: #f0f0f0;
   margin-bottom: 10px;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
 }
 
 .controls {
@@ -82,4 +85,17 @@ input[type="number"] {
 
 label {
   margin-right: 10px;
+}
+
+/* Shake animation on ground impact */
+@keyframes shake {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(-3px); }
+  50% { transform: translateX(3px); }
+  75% { transform: translateX(-2px); }
+  100% { transform: translateX(0); }
+}
+
+.shake {
+  animation: shake 0.3s;
 }
