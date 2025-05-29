@@ -51,10 +51,14 @@ class Ball {
     private startTime = 0; // Time when simulation starts
     private stopTime = 0;  // Time when ball hits the ground
 
+    private canvas: HTMLCanvasElement;
+    private ctx: CanvasRenderingContext2D;
+
     constructor(
-        private canvas: HTMLCanvasElement,
-        private ctx = canvas.getContext('2d')!
+        canvas: HTMLCanvasElement,
     ) {
+        this.canvas = canvas;
+        this.ctx = canvas.getContext('2d')!;
         this.reset();
     }
 
@@ -134,11 +138,15 @@ class AnimationController {
     private fps: number;
     private frameInterval: number;
 
-    constructor(
-        canvasId: string,
-        private fpsInputId: string,
-        private deltaTimeCheckboxId: string
-    ) {
+    private canvasId: string;
+    private fpsInputId: string;
+    private deltaTimeCheckboxId: string;
+
+    constructor(canvasId: string, fpsInputId: string, deltaTimeCheckboxId: string) {
+        this.canvasId = canvasId;
+        this.fpsInputId = fpsInputId;
+        this.deltaTimeCheckboxId = deltaTimeCheckboxId;
+
         const canvas = document.getElementById(canvasId) as HTMLCanvasElement;
         this.ball = new Ball(canvas);
 
